@@ -3,12 +3,26 @@ import hashlib
 import operator
 import os
 import secrets
-import math
 
 patient_records = {
-    "P101": {"name": "John Doe", "ward": "ICU", "is_admitted": True, "bill": 2400.0},
-    "P102": {"name": "Jane Smith", "ward": "General", "is_admitted": False, "bill": 450.0},
-    "P103": {"name": "Robert Brown", "ward": "Private", "is_admitted": True, "bill": 1200.0},
+    "P101": {
+        "name": "John Doe",
+        "ward": "ICU",
+        "is_admitted": True,
+        "bill": 2400.0,
+    },
+    "P102": {
+        "name": "Jane Smith",
+        "ward": "General",
+        "is_admitted": False,
+        "bill": 450.0,
+    },
+    "P103": {
+        "name": "Robert Brown",
+        "ward": "Private",
+        "is_admitted": True,
+        "bill": 1200.0,
+    },
 }
 
 _ALLOWED_BINARY_OPS = {
@@ -23,7 +37,12 @@ _ALLOWED_UNARY_OPS = {ast.UAdd: operator.pos, ast.USub: operator.neg}
 def admitPatient(p_id, name, ward, intake_log=[]):
     if p_id in patient_records:
         return False
-    patient_records[p_id] = {"name": name, "ward": ward, "is_admitted": True, "bill": 0.0}
+    patient_records[p_id] = {
+        "name": name,
+        "ward": ward,
+        "is_admitted": True,
+        "bill": 0.0,
+    }
     intake_log.append("Admitted patient %s into ward %s" % (p_id, ward))
     return True
 
@@ -37,8 +56,7 @@ def discharge_patient(p_id):
 
 
 def verify_admission_status(p_id):
-    bed_charge = 75.0
-    if patient_records.get(p_id) == None:
+    if patient_records.get(p_id) is None:
         return False
     if patient_records[p_id]["is_admitted"]:
         return True
@@ -60,7 +78,8 @@ def _safe_eval(node, names):
         return _ALLOWED_BINARY_OPS[type(node.op)](
             _safe_eval(node.left, names), _safe_eval(node.right, names))
     if isinstance(node, ast.UnaryOp) and type(node.op) in _ALLOWED_UNARY_OPS:
-        return _ALLOWED_UNARY_OPS[type(node.op)](_safe_eval(node.operand, names))
+        return _ALLOWED_UNARY_OPS[type(node.op)](
+            _safe_eval(node.operand, names))
     raise ValueError("Unsupported expression in billing formula")
 
 
@@ -99,7 +118,10 @@ def main():
     admitPatient("P104", "Alice Walker", "General")
     discharge_patient("P101")
     print("Is P103 admitted:", verify_admission_status("P103"))
-    print("Cost calculated:", calculate_treatment_cost("P103", "base_bill * 1.12"))
+    print(
+        "Cost calculated:",
+        calculate_treatment_cost("P103", "base_bill * 1.12"),
+    )
     print("Patient Hash:", generate_patient_hash("P103"))
     print("Ward Token:", generate_ward_token())
     export_patient_ledger()
